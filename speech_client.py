@@ -4,7 +4,7 @@ import base64
 import pynexus as nxpy
 
 if __name__ == '__main__':
-    with open("/home/abraham/example_speech.wav", 'rb') as fichero:
+    with open("example_speech.wav", 'rb') as fichero:
         audio = fichero.read()
 
     client = nxpy.Client('tcp://root:root@localhost:1717')

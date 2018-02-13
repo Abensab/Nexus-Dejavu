@@ -8,6 +8,7 @@ from dejavu.recognize import FileRecognizer
 # load config from a JSON file (or anything outputting a python dictionary)
 with open("dejavu.cnf.SAMPLE") as f:
     config = json.load(f)
+    print(config)
 
 if __name__ == '__main__':
 
