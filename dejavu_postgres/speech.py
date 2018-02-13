@@ -35,10 +35,10 @@ def recognize(task):
     # Dejavu
     song = djv.recognize(FileRecognizer,name_file)
     if song!=None:
-	eprint('--confidence: '+str(song['confidence']))
+	print('--confidence: '+str(song['confidence']))
 	if song['confidence']>100:
 		os.remove(name_file)
-		print(song)
+		print("Dejavu:"+song['song_name'])
 		return song['song_name'], err
 		
     
@@ -55,19 +55,20 @@ def recognize(task):
     
     try:
         res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
-        print(res)
+        print("Google:"+res)
+	#Dejavu, cambiar nombre del fichero y fingerprintear
+	shutil.move(name_file, 'grabaciones/'+res+'.wav')
+	djv.fingerprint_file('grabaciones/'+res+'.wav')
+	os.remove('grabaciones/'+res+'.wav')
+	
     except Exception as ex:
+	print('Speech is unintelligible')
+	os.remove(name_file)
         if str(ex) == 'Speech is unintelligible':
             return [{'text': '', 'confidence': 1.0}], None
         err = {"code": nxpy.ErrUnknownError, "message": ""}
         eprint(ex)
-
-    
-    #Dejavu, cambiar nombre del fichero y fingerprintear
-    shutil.move(name_file, 'grabaciones/'+res+'.wav')
-    djv.fingerprint_file('grabaciones/'+res+'.wav')
-    
-    os.remove('grabaciones/'+res+'.wav')
+	print(res)
 	
     return res, err
     
