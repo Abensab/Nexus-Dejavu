@@ -19,12 +19,10 @@ if __name__ == '__main__':
         print('FingerPrinting directory')
         #djv.fingerprint_directory("training-wav", [".wav"])
 
-	djv.fingerprint_file("training-wav/1.wav")
-	djv.fingerprint_file("training-wav/2.wav")
 	
 	# Recognize audio from a file
         print("[Probando con una meloia entrenada]")
-        song = djv.recognize(FileRecognizer, "training-wav/1.wav")
+        song = djv.recognize(FileRecognizer, "training-wav/silencio.wav")
         print "From file we recognized: %s\n" % song
         
         print("Probamos los tests...")

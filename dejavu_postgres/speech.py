@@ -25,7 +25,7 @@ def recognize(task):
     res, err = None, None
     if not isinstance(task.params, dict) or (isinstance(task.params, dict) and 'audio_stream' not in task.params):
         return None, {"code": nxpy.ErrInvalidParams, "message": ""}
-	
+    
     sound = base64.b64decode(task.params['audio_stream'])
     name_file= 'grabaciones/file'+str(random.randint(0, 10000))+'.wav'
     
@@ -42,18 +42,17 @@ def recognize(task):
 		return song['song_name'], err
 		
     
-
+    print('No reconocida en Dejavu')
     audio_stream = io.BytesIO(sound)
     audio_frmt   = task.params.get('audio_frmt', 'wav')
    
     r=sr.Recognizer()
     r.dynamic_energy_threshold = True
-    with sr.WavFile(audio_stream) as source:
-        audio = r.record(source)
-    
-    
-    
+        
+	    
     try:
+        with sr.WavFile(audio_stream) as source:
+            audio = r.record(source)
         res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
         print("Google:"+res)
 	#Dejavu, cambiar nombre del fichero y fingerprintear
@@ -63,6 +62,8 @@ def recognize(task):
 	
     except Exception as ex:
 	print('Speech is unintelligible')
+	
+	#Entrenar en Dejavu el no legible para que no pase por google
 	os.remove(name_file)
         if str(ex) == 'Speech is unintelligible':
             return [{'text': '', 'confidence': 1.0}], None
