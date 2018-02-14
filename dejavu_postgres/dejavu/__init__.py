@@ -5,7 +5,6 @@ import multiprocessing
 import os
 import traceback
 import sys
-from dejavu.recognize import FileRecognizer
 
 
 class Dejavu(object):
