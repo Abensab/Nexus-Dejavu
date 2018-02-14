@@ -5,6 +5,7 @@ import multiprocessing
 import os
 import traceback
 import sys
+from dejavu.recognize import FileRecognizer
 
 
 class Dejavu(object):
@@ -98,18 +99,20 @@ class Dejavu(object):
         songname = decoder.path_to_songname(filepath)
         song_name = song_name or songname
         # don't refingerprint already fingerprinted files
-        if song_name in self.songnames_set:
+	        
+	if song_name in self.songnames_set:
             print "%s already fingerprinted, continuing..." % song_name
+	
+	
         else:
-            song_name, hashes = _fingerprint_worker(filepath,
-                                                    self.limit,
-                                                    song_name=song_name)
-
-            sid = self.db.insert_song(song_name)
-
-            self.db.insert_hashes(sid, hashes)
-            self.db.set_song_fingerprinted(sid)
-            self.get_fingerprinted_songs()
+	    song_name, hashes = _fingerprint_worker(filepath,
+						    self.limit,
+						    song_name=song_name)
+	    sid = self.db.insert_song(song_name)
+	    self.db.insert_hashes(sid, hashes)
+	    self.db.set_song_fingerprinted(sid)
+	    self.get_fingerprinted_songs()
+	    
 
     def find_matches(self, samples, Fs=fingerprint.DEFAULT_FS):
         hashes = fingerprint.fingerprint(samples, Fs=Fs)
