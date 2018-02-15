@@ -10,4 +10,4 @@ if __name__ == '__main__':
     client = nxpy.Client('tcp://root:root@localhost:1717')
     params = {'audio_stream': base64.b64encode(audio)}
     res, err = client.taskPush("nayar.common.speech.recognize", params, 10)
-    print res
+    print res, err

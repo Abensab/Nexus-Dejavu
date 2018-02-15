@@ -24,7 +24,10 @@ def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
 def recognize(task):
-    res, err = None, None
+    res = [{'text': ' ', 'confidence': 1.0}]
+    err = None
+
+    
     if not isinstance(task.params, dict) or (isinstance(task.params, dict) and 'audio_stream' not in task.params):
         return None, {"code": nxpy.ErrInvalidParams, "message": ""}
     
@@ -36,42 +39,58 @@ def recognize(task):
     
     if is_silent(name_file):
 	os.remove(name_file)
-	return [{'text': '', 'confidence': 1.0}], None
+	return res, err
 						    
     # Dejavu
     song = djv.recognize(FileRecognizer,name_file)
-    if song!=None:
+    if song!=None and song['confidence']>100:
 	print('--Reconocida, confidence: '+str(song['confidence']))
-	if song['confidence']>100:
-		os.remove(name_file)
-		return song['song_name'], err
-		
-    print('--No reconocida en Dejavu---')
+	os.remove(name_file)
+	print(song['song_name'])
+	res[0]['text']=song['song_name']
+	
+    else:	
+        print('--No reconocida en Dejavu---')
     
-    audio_stream = io.BytesIO(sound)
-    audio_frmt   = task.params.get('audio_frmt', 'wav')
+	audio_stream = io.BytesIO(sound)
+	audio_frmt   = task.params.get('audio_frmt', 'wav')
    
-    r=sr.Recognizer()
-    r.dynamic_energy_threshold = True
-            
-    try:
-        with sr.WavFile(audio_stream) as source:
-            audio = r.record(source)
-        res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
-        print("--Google:"+res)
-	#Dejavu, cambiar nombre del fichero y fingerprintear
-	fingerprint_file(name_file, 'grabaciones/'+res+'.wav')
-	
-    except Exception as ex:
-	print('--Speech is unintelligible')
-	#Entrenar en Dejavu el no legible para que no pase por google	    
-	fingerprint_file(name_file, 'grabaciones/'+str(random.randint(0, 10000))+'-silent-'+str(random.randint(0, 10000))+'.wav')
-	
-        if str(ex) == 'Speech is unintelligible' or str(ex) == 'Audio file could not be read as PCM WAV, AIFF/AIFF-C, or Native FLAC; check if file is corrupted or in another format':
-            return [{'text': '', 'confidence': 1.0}], None
-        err = {"code": nxpy.ErrUnknownError, "message": ""}
-        eprint(ex)
+	r=sr.Recognizer()
+	r.dynamic_energy_threshold = True
     
+	try:
+	    with sr.AudioFile(audio_stream) as source:
+		audio = r.record(source)
+	    print('Antes de google')
+	    g_res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
+	    print('Despues de google')
+	    if g_res!=None:
+		print("--Google:"+g_res)
+		#Dejavu, cambiar nombre del fichero y fingerprintear
+		fingerprint_file(name_file, 'grabaciones/'+g_res+'.wav')
+		res[0]['text']=g_res;
+	    else:
+		print('Error en Google: '+ g_res)
+	except Exception as ex:
+	    
+	    eprint(ex)
+	    if str(ex) == '':
+		print('--UnknownValueError')
+		#UnknownValueError twrhowed by r.recognize_google(), like silences or some noise audios
+		fingerprint_file(name_file, 'grabaciones/ .wav')
+		
+	    if str(ex) == 'Audio file could not be read as PCM WAV, AIFF/AIFF-C, or Native FLAC; check if file is corrupted or in another format':
+		#NO Entrenar en Dejavu el no legible porque Google no ha detectado 
+		err = {"code": nxpy.ErrUnknownError, "message": ""}
+		
+	    elif str(ex) == 'Speech is unintelligible':
+		print('--Speech is unintelligible')
+		#Entrenar en Dejavu el no legible para que no pase por google
+	        fingerprint_file(name_file, 'grabaciones/ .wav')
+	    
+	    return res, err
+	    
+
     return res, err
 
 
