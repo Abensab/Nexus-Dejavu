@@ -1,0 +1,15 @@
+{
+	"server": {
+		"user": "root",
+		"pass": "root",
+		"url": "172.17.0.2:1717",
+		"loglevel": "error"
+	},
+	"services": {
+		"speech": {
+			"path": "nayar.common.speech",
+			"description": "",
+			"pulls": 10
+		}
+	}
+}

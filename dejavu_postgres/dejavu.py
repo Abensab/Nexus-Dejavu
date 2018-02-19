@@ -1,19 +1,18 @@
 #!/usr/bin/python
-
-import os
 import sys
+import os
 import json
 import warnings
 import argparse
 
-from dejavu import Dejavu
+import Dejavu
 from dejavu.recognize import FileRecognizer
 from dejavu.recognize import MicrophoneRecognizer
 from argparse import RawTextHelpFormatter
 
 warnings.filterwarnings("ignore")
 
-DEFAULT_CONFIG_FILE = "dejavu.cnf.SAMPLE"
+DEFAULT_CONFIG_FILE = "dejavu.cnf"
 
 
 def init(configpath):
