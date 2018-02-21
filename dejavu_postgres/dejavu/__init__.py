@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from dejavu.database import get_database
 import dejavu.decoder as decoder
 import fingerprint
@@ -108,7 +109,7 @@ class Dejavu(object):
 	"""
 	song = self.recognize(FileRecognizer,filepath)      
 	if song !=None and song['confidence']>100:
-            print "%s already fingerprinted, continuing..." % song_name
+            print "%s already fingerprinted, continuing..." % son_name.encode("ascii",errors='replace')
 	
         else:
 	    song_name, hashes = _fingerprint_worker(filepath,
@@ -194,10 +195,10 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
         # TODO: Remove prints or change them into optional logging.
         print("Fingerprinting channel %d/%d for %s" % (channeln + 1,
                                                        channel_amount,
-                                                       filename))
+                                                       filename.encode("ascii",errors='replace')))
         hashes = fingerprint.fingerprint(channel, Fs=Fs)
         print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
-                                                 filename))
+                                                 filename.encode("ascii",errors='replace')))
         result |= set(hashes)
 
     return song_name, result

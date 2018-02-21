@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 # wavio.py
 # Author: Warren Weckesser
 # License: BSD 3-Clause (http://opensource.org/licenses/BSD-3-Clause)

@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 """ Class for interacting with Postgres database.
 """
 from itertools import izip_longest

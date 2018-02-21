@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from __future__ import division
 from pydub import AudioSegment
 from dejavu.decoder import path_to_songname

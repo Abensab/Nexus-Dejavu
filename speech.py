@@ -1,17 +1,10 @@
 #!/usr/bin/python
-
+# -*- coding: UTF-8 -*-
 from __future__ import print_function
-import sys
+import sys, os, shutil, random , warnings,io, base64, json
 import pynexus as nxpy
-import os
-import shutil
-import random
-import warnings
 import speech_recognition as sr
-import io, base64, sys
 #warnings.filterwarnings("ignore")
-import json
-
 sys.path
 sys.path.append(os.getcwd()+'/dejavu_postgres/')
 from nxsugarpy import *
@@ -41,7 +34,11 @@ def stats(task):
     global dejavu_recognized
     global google_recognized
     global no_recognized_word
-    service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={1} method={2} params={3} tags={4} ]", task.path, task.method, task.params, task.tags)
+    try:
+        del task.params['audio_stream']
+    except:
+	pass
+    service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={0} method={1} params={2} tags={3} ]", task.path, task.method, task.params, task.tags)
     with lock:
         res = {
             'InvalidParams': invalid_params,
@@ -62,7 +59,7 @@ def recognize(task):
     
     if not isinstance(task.params, dict) or (isinstance(task.params, dict) and 'audio_stream' not in task.params):
         with lock: invalid_params += 1
-        service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={1} method={2} params={3} tags={4} ]", task.path, task.method, task.params, task.tags)
+        service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={0} method={1} params={2} tags={3} ]", task.path, task.method, task.params, task.tags)
         return None, {"code": nxpy.ErrInvalidParams, "message": ""}
     
     res = [{'text': ' ', 'confidence': 1.0}]
@@ -76,7 +73,7 @@ def recognize(task):
     except:
 	pass
 	
-    service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={1} method={2} params={3} tags={4} ]", task.path, task.method, task.params, task.tags)
+    service.logWithFields(InfoLevel, {"type": "pull", "path": task.path, "method": task.method, "params": task.params, "tags": task.tags}, "task[ path={0} method={1} params={2} tags={3} ]", task.path, task.method, task.params, task.tags)
     
     
     
@@ -91,14 +88,11 @@ def recognize(task):
     # Dejavu
     song = djv.recognize(FileRecognizer,name_file)
     if song!=None and song['confidence']>100:
-	print('--Reconocida, confidence: '+str(song['confidence']))
 	os.remove(name_file)
-	print(song['song_name'])
         with lock: dejavu_recognized +=1
 	res[0]['text']=song['song_name']
 	
     else:	
-        print('--No reconocida en Dejavu---')
     
 	audio_stream = io.BytesIO(sound)
 	audio_frmt   = task.params.get('audio_frmt', 'wav')
@@ -109,17 +103,19 @@ def recognize(task):
 	try:
 	    with sr.AudioFile(audio_stream) as source:
 		audio = r.record(source)
-	    print('Antes de google')
 	    g_res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
-	    print('Despues de google')
 	    if g_res!=None:
-		print("--Google:"+g_res)
 		#Dejavu, cambiar nombre del fichero y fingerprintear
-		fingerprint_file(name_file, 'grabaciones/'+g_res+'.wav')
-		res[0]['text']=g_res;
+		print("aqui se supone que da el error: ")
+		path="grabaciones/"+g_res.encode("utf8")+".wav"
+		print(repr(g_res))
+		print(repr(g_res.encode("utf8")))
+		print(repr(path))
+		print(repr(path.encode("utf8")))
+		fingerprint_file(name_file, path)
+		res[0]['text']=g_res
                 with lock: google_recognized +=1
 	    else:
-		print('Error en Google: '+ g_res)
                 with lock: no_recognized_word +=1
 	except Exception as ex:
 	    
@@ -145,9 +141,11 @@ def recognize(task):
     return res, err
 
 
-def fingerprint_file(name_file,new_path):
+def fingerprint_file(name_file, new_path):  
+    print(repr('fingerprinting...'))
     shutil.move(name_file, new_path)
     djv.fingerprint_file(new_path)
+    print(repr('...fingerprinted'))
     os.remove(new_path)
 
 
