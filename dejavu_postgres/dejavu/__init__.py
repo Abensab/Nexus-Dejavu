@@ -109,7 +109,7 @@ class Dejavu(object):
 	"""
 	song = self.recognize(FileRecognizer,filepath)      
 	if song !=None and song['confidence']>100:
-            print "%s already fingerprinted, continuing..." % son_name.encode("ascii",errors='replace')
+            print "%s already fingerprinted, continuing..." % song_name.encode("ascii",errors='replace')
 	
         else:
 	    song_name, hashes = _fingerprint_worker(filepath,
@@ -195,10 +195,10 @@ def _fingerprint_worker(filename, limit=None, song_name=None):
         # TODO: Remove prints or change them into optional logging.
         print("Fingerprinting channel %d/%d for %s" % (channeln + 1,
                                                        channel_amount,
-                                                       filename.encode("ascii",errors='replace')))
+                                                       filename))
         hashes = fingerprint.fingerprint(channel, Fs=Fs)
         print("Finished channel %d/%d for %s" % (channeln + 1, channel_amount,
-                                                 filename.encode("ascii",errors='replace')))
+                                                 filename))
         result |= set(hashes)
 
     return song_name, result

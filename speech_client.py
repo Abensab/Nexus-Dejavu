@@ -3,7 +3,7 @@ import base64
 import pynexus as nxpy
 
 if __name__ == '__main__':
-    with open("posible_acento.wav", 'rb') as fichero:
+    with open("linetest-apolo_638389235.wav", 'rb') as fichero:
         audio = fichero.read()
 
     client = nxpy.Client('tcp://root:root@localhost:1717')

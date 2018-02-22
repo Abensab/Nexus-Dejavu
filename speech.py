@@ -13,6 +13,7 @@ from dejavu import fingerprint
 import dejavu.decoder as decoder
 from dejavu.recognize import FileRecognizer
 import threading
+import traceback
 
 lock = threading.Lock()
 invalid_params = 0
@@ -103,22 +104,25 @@ def recognize(task):
 	try:
 	    with sr.AudioFile(audio_stream) as source:
 		audio = r.record(source)
+	    print("reconocemos audio en google...")
 	    g_res = r.recognize_google(audio, language='es-ES', key = "AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw")
 	    if g_res!=None:
 		#Dejavu, cambiar nombre del fichero y fingerprintear
 		print("aqui se supone que da el error: ")
-		path="grabaciones/"+g_res.encode("utf8")+".wav"
 		print(repr(g_res))
 		print(repr(g_res.encode("utf8")))
+		print("-:"+g_res.encode("utf8"))
+		path="grabaciones/"+g_res+".wav"
 		print(repr(path))
 		print(repr(path.encode("utf8")))
+		print("-:"+path.encode("utf8"))
 		fingerprint_file(name_file, path)
 		res[0]['text']=g_res
                 with lock: google_recognized +=1
 	    else:
                 with lock: no_recognized_word +=1
 	except Exception as ex:
-	    
+	    eprint(traceback.format_exc())
 	    eprint(ex)
 	    if str(ex) == '':
 		print('--UnknownValueError')
@@ -143,10 +147,10 @@ def recognize(task):
 
 def fingerprint_file(name_file, new_path):  
     print(repr('fingerprinting...'))
-    shutil.move(name_file, new_path)
-    djv.fingerprint_file(new_path)
+    shutil.move(name_file, new_path.encode("utf8"))
+    djv.fingerprint_file(new_path.encode("utf8"))
     print(repr('...fingerprinted'))
-    os.remove(new_path)
+    os.remove(new_path.encode("utf8"))
 
 
 def is_silent(file_path): 
